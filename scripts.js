@@ -155,3 +155,109 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
   
+  $(document).ready(function () {
+    const loader = $("#latest-loader");
+    const carouselInner = $("#latest-videos"); // Target the correct carousel inner ID
+    const url = "https://smileschool-api.hbtn.info/latest-videos"; // Update API URL
+    let videos = []; // Store fetched data
+    let currentIndex = 0; // Track the current set of cards
+  
+    // Display the loader
+    loader.show();
+  
+    // Fetch data from the API
+    $.getJSON(url, function (data) {
+      videos = data; // Store the fetched data
+      updateCarousel(); // Display the first set of cards
+      loader.hide(); // Hide the loader after content is appended
+    });
+  
+    // Function to update the carousel with the current set of 4 cards
+    function updateCarousel() {
+      carouselInner.empty(); // Clear the current carousel content
+  
+      // Get the next 4 videos
+      const cards = getVisibleCards().map(createCard).join("");
+      carouselInner.append(`<div class="carousel-item active">
+        <div class="row align-items-center justify-content-center">${cards}</div>
+      </div>`);
+    }
+  
+    // Function to get the next 4 visible cards, looping if necessary
+    function getVisibleCards() {
+      const visibleCards = [];
+      for (let i = 0; i < 4; i++) {
+        // Wrap the index around using modulo to ensure we get 4 cards
+        const index = (currentIndex + i) % videos.length;
+        visibleCards.push(videos[index]);
+      }
+      return visibleCards;
+    }
+  
+    // Function to create a single card
+    function createCard(video) {
+      return `
+        <div class="col-12 col-sm-6 col-md-6 col-lg-3 d-flex justify-content-center">
+          <div class="card">
+            <img
+              src="${video.thumb_url}"
+              class="card-img-top"
+              alt="Video thumbnail"
+            />
+            <div class="card-img-overlay text-center">
+              <img
+                src="images/play.png"
+                alt="Play"
+                width="64px"
+                class="align-self-center play-overlay"
+              />
+            </div>
+            <div class="card-body">
+              <h5 class="card-title font-weight-bold">${video.title}</h5>
+              <p class="card-text text-muted">${video["sub-title"]}</p>
+              <div class="creator d-flex align-items-center">
+                <img
+                  src="${video.author_pic_url}"
+                  alt="Creator of Video"
+                  width="30px"
+                  class="rounded-circle"
+                />
+                <h6 class="pl-3 m-0 main-color">${video.author}</h6>
+              </div>
+              <div class="info pt-3 d-flex justify-content-between">
+                <div class="rating">
+                  ${renderStars(video.star)}
+                </div>
+                <span class="main-color">${video.duration}</span>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
+  
+    // Function to render stars
+    function renderStars(starCount) {
+      let stars = "";
+      for (let i = 0; i < 5; i++) {
+        stars += `<img
+          src="images/star_${i < starCount ? "on" : "off"}.png"
+          alt="star"
+          width="15px"
+        />`;
+      }
+      return stars;
+    }
+  
+    // Handle next button click
+    $("#carouselExampleControls3 .carousel-control-next").click(function () {
+      currentIndex = (currentIndex + 1) % videos.length;
+      updateCarousel();
+    });
+  
+    // Handle previous button click
+    $("#carouselExampleControls3 .carousel-control-prev").click(function () {
+      currentIndex = (currentIndex - 1 + videos.length) % videos.length;
+      updateCarousel();
+    });
+  });
+  
