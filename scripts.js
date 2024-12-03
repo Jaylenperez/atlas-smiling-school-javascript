@@ -325,7 +325,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 />
                                 <div class="card-body">
                                     <h5 class="card-title font-weight-bold">${course.title}</h5>
-                                    <p class="card-text text-muted">${course.subtitle}</p>
+                                    <p class="card-text">${course['sub-title']}</p>
                                     <div class="creator d-flex align-items-center">
                                         <img
                                             src="${course.author_pic_url}"
