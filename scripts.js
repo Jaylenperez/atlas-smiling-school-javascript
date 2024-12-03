@@ -261,3 +261,117 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
   
+  $(document).ready(function () {
+    const apiUrl = "https://smileschool-api.hbtn.info/courses";
+
+    // Cache DOM elements
+    const loader = $(".loader");
+    const videoCardsContainer = $(".results .row");
+    const topicDropdown = $("#topic-dropdown-wrapper .dropdown-menu");
+    const sortDropdown = $("#sort-dropdown-wrapper .dropdown-menu");
+    const searchInput = $(".search-text-area");
+
+    // Initialize values
+    let selectedTopic = "all";
+    let selectedSort = "most_popular";
+    let searchValue = "";
+
+    // Fetch data and populate UI
+    const fetchAndRenderData = () => {
+        // Show loader
+        loader.show();
+        videoCardsContainer.empty();
+
+        // Fetch data
+        $.ajax({
+            url: apiUrl,
+            method: "GET",
+            data: { q: searchValue, topic: selectedTopic, sort: selectedSort },
+            success: (data) => {
+                // Populate dropdowns if not already done
+                if (!topicDropdown.children().length) {
+                    data.topics.forEach((topic) => {
+                        topicDropdown.append(
+                            `<a class="dropdown-item" href="#" data-value="${topic}">${topic}</a>`
+                        );
+                    });
+                }
+                if (!sortDropdown.children().length) {
+                    data.sorts.forEach((sort) => {
+                        sortDropdown.append(
+                            `<a class="dropdown-item" href="#" data-value="${sort}">${sort.replace("_", " ")}</a>`
+                        );
+                    });
+                }
+
+                // Populate video cards
+                data.courses.forEach((course) => {
+                    const stars = Array(5)
+                        .fill("")
+                        .map((_, i) =>
+                            i < course.star
+                                ? '<img src="images/star_on.png" alt="star on" width="15px" />'
+                                : '<img src="images/star_off.png" alt="star off" width="15px" />'
+                        )
+                        .join("");
+
+                    const card = `
+                        <div class="col-12 col-sm-6 col-lg-3 d-flex justify-content-center mb-4">
+                            <div class="card">
+                                <img
+                                    src="${course.thumb_url}"
+                                    class="card-img-top"
+                                    alt="${course.title} thumbnail"
+                                />
+                                <div class="card-body">
+                                    <h5 class="card-title font-weight-bold">${course.title}</h5>
+                                    <p class="card-text text-muted">${course.subtitle}</p>
+                                    <div class="creator d-flex align-items-center">
+                                        <img
+                                            src="${course.author_pic_url}"
+                                            alt="${course.author} picture"
+                                            width="30px"
+                                            class="rounded-circle"
+                                        />
+                                        <h6 class="pl-3 m-0 main-color">${course.author}</h6>
+                                    </div>
+                                    <div class="info pt-3 d-flex justify-content-between">
+                                        <div class="rating">${stars}</div>
+                                        <span class="main-color">${course.duration}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    videoCardsContainer.append(card);
+                });
+
+                // Hide loader
+                loader.hide();
+            },
+            error: () => {
+                loader.hide();
+                alert("An error occurred while fetching data.");
+            },
+        });
+    };
+
+    // Handle dropdown selection
+    $(document).on("click", ".dropdown-item", function (e) {
+        e.preventDefault();
+        const dropdown = $(this).closest(".dropdown");
+        const value = $(this).data("value");
+        dropdown.find(".dropdown-toggle span").text($(this).text());
+        if (dropdown.is("#topic-dropdown-wrapper")) selectedTopic = value;
+        if (dropdown.is("#sort-dropdown-wrapper")) selectedSort = value;
+        fetchAndRenderData();
+    });
+
+    // Handle search input
+    searchInput.on("input", function () {
+        searchValue = $(this).val();
+        fetchAndRenderData();
+    });
+
+    // Initial fetch
+    fetchAndRenderData();
+});
