@@ -78,5 +78,7 @@ The Holberton Smiling School web pages were developed by sections using the Boot
 
 - Github: [@Jaylenperez](https://github.com/Jaylenperez)
 
+[Link to my hosted page:](https://jaylenperez.github.io/atlas-smiling-school-javascript/)
+
 # Codebase Author
 Jhoan Zamora: [jzamora5](https://github.com/jzamora5)
